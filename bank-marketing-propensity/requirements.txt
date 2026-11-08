@@ -1,0 +1,10 @@
+numpy
+pandas
+scikit-learn>=1.2   # sparse_output= em OneHotEncoder exige >=1.2
+xgboost
+imbalanced-learn
+matplotlib
+seaborn
+kagglehub
+joblib
+pytest
