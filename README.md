@@ -131,8 +131,8 @@ servico.prever_propensao_cliente({"age": 20, "balance": 500.0, "day": 15, "durat
 ## 5. Como executar
 
 ```bash
-git clone https://github.com/<seu-usuario>/bank-marketing-propensity.git
-cd bank-marketing-propensity
+git clone https://github.com/alessandravargas/marketing_bancario_portugues.git
+cd marketing_bancario_portugues
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
@@ -154,7 +154,7 @@ Saídas em `reports/` (`metricas_teste.csv`, `top_features_xgboost.csv`, `exempl
 ## 6. Estrutura do repositório
 
 ```
-bank-marketing-propensity/
+marketing_bancario_portugues/
 ├── README.md
 ├── requirements.txt
 ├── LICENSE
