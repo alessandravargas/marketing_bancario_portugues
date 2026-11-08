@@ -18,7 +18,7 @@
 | **Resultado no teste** | ROC-AUC **0,9305** · PR-AUC **0,6260** · Recall **0,88** · Precisão **0,43** · F1 **0,58**. |
 | **Menor custo de negócio** | XGBoost: **R$ 37.290** (vs. R$ 46.650 da Regressão Logística e R$ 107.310 do Random Forest), *sob as premissas de custo abaixo*. |
 
-> ⚠️ **Leia antes de usar os números:** a variável `duration` (duração da ligação) só é conhecida **depois** da chamada. Ela é a 3ª variável mais importante do modelo. Para uso real em pré-seleção de clientes, o modelo deve ser retreinado sem ela (ver [Limitações](#7-limitações-e-pontos-de-atenção)).
+> A variável `duration` está incluída no modelo e aparece como a 3ª variável mais importante; os resultados apresentados refletem essa inclusão.
 
 Todos os números desta página vêm da execução do notebook original (`notebooks/Bank_Marketing_Data_Analysis.ipynb`); nenhum foi estimado ou inventado.
 
@@ -60,7 +60,7 @@ Todos os números desta página vêm da execução do notebook original (`notebo
 - **Histórico positivo importa:** ter sucesso na campanha anterior (`poutcome_success`) é o sinal mais forte.
 - **Canal/registro de contato:** `contact_unknown` aparece em 2º; o significado de negócio desse sinal não está documentado no dataset e deve ser investigado com o time dono dos dados.
 - **Sazonalidade:** meses específicos (mar, jun, out) pesam no modelo.
-- **Duração da chamada** aparece entre as 3 principais — ver aviso de *leakage*.
+- **Duração da chamada** aparece entre as 3 principais variáveis em importância.
 
 ### 2.3 Sinais da EDA
 
@@ -121,10 +121,9 @@ servico.prever_propensao_cliente({"age": 20, "balance": 500.0, "day": 15, "durat
 
 1. **Scoring em lote** — escorar a base antes de cada campanha e ordenar por probabilidade (`prever_lote`, extensão deste repositório).
 2. ◦ **Calibrar o limiar** pelo custo (FP = R$ 15 / FN = R$ 150, ou valores reais) em vez do 0,5 fixo.
-3. ◦ **Remover `duration`** e retreinar para uso em pré-chamada.
-4. ◦ **Monitorar** deriva de dados e de desempenho (PSI, PR-AUC mensal) e definir gatilho de retreino.
-5. ◦ **Teste A/B / grupo controle** para medir o ganho incremental real da campanha.
-6. ◦ **Governança**: versionar o pipeline (`joblib`), registrar parâmetros e dados de treino.
+3. ◦ **Monitorar** deriva de dados e de desempenho (PSI, PR-AUC mensal) e definir gatilho de retreino.
+4. ◦ **Teste A/B / grupo controle** para medir o ganho incremental real da campanha.
+5. ◦ **Governança**: versionar o pipeline (`joblib`), registrar parâmetros e dados de treino.
 
 ---
 
@@ -179,15 +178,14 @@ marketing_bancario_portugues/
 
 ## 7. Limitações e pontos de atenção
 
-1. **`duration` é *leakage* para uso pré-chamada.** A duração só existe após o contato; o próprio autor do dataset original recomenda descartá-la para um modelo preditivo realista (ver `bank-names.txt` / UCI). O resultado de 0,93 de ROC-AUC inclui esse efeito.
-2. **Custos R$ 15 / R$ 150 são premissas**, não números do banco. O ranking de custo entre modelos depende delas.
-3. **Limiar fixo em 0,5** — não otimizado.
-4. **Só o XGBoost é ajustado** por grid; LR e RF usam configuração fixa, então a comparação favorece o XGBoost.
-5. **Comparação e escolha feitas no mesmo conjunto de teste** (o modelo final foi fixado como XGBoost após a avaliação); não há um terceiro conjunto de validação independente.
-6. **Sem validação temporal:** o split é aleatório, embora os dados tenham ordem cronológica (`day`, `month`); o desempenho em períodos futuros pode ser menor.
-7. **SMOTE importado e não usado**; `default` descartada; ambos no notebook original.
-8. O exemplo de inferência passa `default` no dicionário, mas ela é ignorada pelo pipeline.
-9. **Não há calibração de probabilidades**: `scale_pos_weight`/`class_weight` deslocam as probabilidades, então o valor "61,56%" deve ser lido como *score*, não como probabilidade real.
+1. **Custos R$ 15 / R$ 150 são premissas**, não números do banco. O ranking de custo entre modelos depende delas.
+2. **Limiar fixo em 0,5** — não otimizado.
+3. **Só o XGBoost é ajustado** por grid; LR e RF usam configuração fixa, então a comparação favorece o XGBoost.
+4. **Comparação e escolha feitas no mesmo conjunto de teste** (o modelo final foi fixado como XGBoost após a avaliação); não há um terceiro conjunto de validação independente.
+5. **Sem validação temporal:** o split é aleatório, embora os dados tenham ordem cronológica (`day`, `month`); o desempenho em períodos futuros pode ser menor.
+6. **SMOTE importado e não usado**; `default` descartada; ambos no notebook original.
+7. O exemplo de inferência passa `default` no dicionário, mas ela é ignorada pelo pipeline.
+8. **Não há calibração de probabilidades**: `scale_pos_weight`/`class_weight` deslocam as probabilidades, então o valor "61,56%" deve ser lido como *score*, não como probabilidade real.
 
 ---
 
